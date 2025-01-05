@@ -28,7 +28,16 @@ if st.button("Calcular"):
     # Processa cada entrada
     for item in lista:
         # Captura os horários no formato "17h", "18h", etc.
-        horarios = [h.strip().lower().replace(':00', 'h').replace(' h', 'h') for h in item.split() if 'h' in h]
+        horarios = [
+    h.strip().lower()
+    .replace(':00', 'h')
+    .replace('hr', 'h')
+    .replace('hrs', 'h')
+    .replace(' h', 'h')
+    .replace('h ', 'h')
+    for h in item.split()
+    if any(substring in h.lower() for substring in ['h', 'hr', 'hrs', ':00'])
+]
         for horario in horarios:
             contagem_horarios[horario] += 1
 
