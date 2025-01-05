@@ -37,7 +37,7 @@ if st.button("Calcular"):
         horarios = [
             padronizar_horario(h)
             for h in item.split()
-            if any(substring in h.lower() for substring in ['h', 'hr', 'hrs', ':00']) or h.isdigit()
+            if any(substring in h.lower() for substring in ['h', ' h', 'hrs', ':00']) or h.isdigit()
         ]
         for horario in horarios:
             contagem_horarios[horario] += 1
