@@ -40,7 +40,7 @@ if st.button("Calcular"):
     total_participantes = 0
 
     # String para armazenar a saída formatada
-    resultado = f"**Vôlei hoje ({data_atual})** \n\n{texto}"
+    resultado = f"*Vôlei hoje ({data_atual})* \n\n{texto}"
 
     # Contagem de horários e valores por participante
     resultado += "Contagem de horários e valores por participante:\n"
