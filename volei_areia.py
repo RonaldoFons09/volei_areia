@@ -17,11 +17,14 @@ texto = st.text_area("Digite a lista de participantes e horários:", """
 15. Fabio 17h
 """, height=300)
 
+# Entrada do valor da hora
+valor_hora = st.number_input("Digite o valor da hora (R$):", min_value=0.0, step=1.0, value=45.0)
+
 # Botão para processar o texto
 if st.button("Calcular"):
     # Obter a data atual
     data_atual = datetime.now().strftime("%d/%m/%Y")
-    st.write(f"**Volei hoje ({data_atual})\n {texto} **")
+    st.write(f"**Vôlei hoje ({data_atual})**")
 
     # Converte o texto em uma lista, removendo os números e espaços extras
     lista = [linha.split('. ', 1)[-1].strip() for linha in texto.strip().splitlines()]
@@ -35,9 +38,6 @@ if st.button("Calcular"):
         horarios = [h.strip() for h in item.split() if h.endswith('h')]
         for horario in horarios:
             contagem_horarios[horario] += 1
-
-    # Valor fixo da hora
-    valor_hora = 45
 
     # Variável para somar os valores dos participantes
     total_participantes = 0
