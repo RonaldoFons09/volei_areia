@@ -49,9 +49,6 @@ if st.button("Calcular"):
     if horarios_com_participantes > 1:
         resultado += f"Todos os horários: R$ {total_participantes:.2f}\n\n"
 
-    chave_pix = st.text_input("Digite sua chave Pix (opcional):", "")
-    resultado += f"\nPix: {chave_pix or '(adicione a chave)'}\n"
-
     st.code(resultado, language="markdown")
 
     # Verificar tamanho do texto para compartilhamento
