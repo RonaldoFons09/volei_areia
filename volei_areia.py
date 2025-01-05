@@ -13,13 +13,6 @@ texto = st.text_area("Digite a lista de participantes e horários:", """
 4. Ronaldo 18h
 5. Ronaldo 18h
 6. Ronaldo 18h
-7. Ronaldo 18h
-8. Ronaldo 18h
-9. Ronaldo 18h
-10. Ronaldo 18h
-11. Ronaldo 18h
-12. Ronaldo 18h
-
 """, height=300)
 
 # Entrada do valor da hora
@@ -47,10 +40,10 @@ if st.button("Calcular"):
     total_participantes = 0
 
     # String para armazenar a saída formatada
-    resultado = f"**Vôlei hoje ({data_atual})** {texto}\n\n"
+    resultado = f"**Vôlei hoje ({data_atual}) \n\n**{texto}"
 
     # Contagem de horários e valores por participante
-    resultado += "### Contagem de horários e valores por participante:\n"
+    resultado += "Contagem de horários e valores por participante:\n"
     for hora, quantidade in contagem_horarios.items():
         if quantidade > 0:  # Mostra apenas horários que aparecem na lista
             valor_por_participante = valor_hora / quantidade
@@ -58,7 +51,7 @@ if st.button("Calcular"):
             resultado += f"- {hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
 
     # Total dos valores por participante
-    resultado += f"\n**Todos os horários: R$ {total_participantes:.2f}**\n"
+    resultado += f"Todos os horários: R$ {total_participantes:.2f}\n"
     resultado += "\nPix: (adicione a chave)\n"
 
     # Exibir o resultado formatado dentro de uma caixinha
