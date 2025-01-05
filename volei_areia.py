@@ -1,4 +1,3 @@
-script:
 import streamlit as st
 from datetime import datetime
 import urllib.parse
