@@ -21,7 +21,7 @@ texto = st.text_area("Digite a lista de participantes e horários:", """
 if st.button("Calcular"):
     # Obter a data atual
     data_atual = datetime.now().strftime("%d/%m/%Y")
-    st.write(f"**Volei hoje ({data_atual})\n {texto}**")
+    st.write(f"**Volei hoje ({data_atual})\n {texto} **")
 
     # Converte o texto em uma lista, removendo os números e espaços extras
     lista = [linha.split('. ', 1)[-1].strip() for linha in texto.strip().splitlines()]
