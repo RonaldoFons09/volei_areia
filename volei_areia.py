@@ -38,7 +38,7 @@ if st.button("Calcular"):
     resultado = f"*Vôlei hoje ({data_atual})* \n\n{texto}"
 
     # Contagem de horários e valores por participante
-    resultado += "\n\n\nContagem de horários e valores por participante:\n\n"
+    resultado += "\n\n\nHorários e valores por participante:\n\n"
     for hora, quantidade in contagem_horarios.items():
         if quantidade > 0:  # Mostra apenas horários que aparecem na lista
             valor_por_participante = valor_hora / quantidade
