@@ -51,7 +51,7 @@ if st.button("Calcular"):
             resultado += f"{hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
 
     # Total dos valores por participante
-    resultado += f"Todos os horários: R$ {total_participantes:.2f}\n"
+    resultado += f"Todos os horários: R$ {total_participantes:.2f}\n\n"
     resultado += "\nPix: (adicione a chave)\n"
 
     # Exibir o resultado formatado dentro de uma caixinha
