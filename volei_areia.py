@@ -7,7 +7,7 @@ st.title("Contador de Participantes de Vôlei 🏐")
 
 # Entrada do texto
 texto = st.text_area("Digite a lista de participantes e horários:", """
-
+ola
 """, height=300)
 
 # Entrada do valor da hora
