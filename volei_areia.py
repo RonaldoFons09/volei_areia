@@ -60,13 +60,17 @@ if st.button("Calcular"):
     # Exibir o resultado formatado dentro de uma caixinha
     st.code(resultado, language="markdown")
     
-    # Codificar o texto para uso em URL
+    # Codificar o texto para ser compartilhado via URL
     texto_compartilhar = urllib.parse.quote(resultado)
 
-    # Link de compartilhamento no WhatsApp
-    url_whatsapp = f"https://api.whatsapp.com/send?text={texto_compartilhar}"
-    st.markdown(f"[Compartilhar no WhatsApp]({url_whatsapp})", unsafe_allow_html=True)
-
-    # Link de compartilhamento no Telegram (opcional)
-    url_telegram = f"https://t.me/share/url?url=&text={texto_compartilhar}"
-    st.markdown(f"[Compartilhar no Telegram]({url_telegram})", unsafe_allow_html=True)
+    # Adicionar botões de copiar e compartilhar
+    col1, col2 = st.columns(2)
+    
+    # Botão de copiar (já nativo no st.code)
+    with col1:
+        st.caption("Clique no botão acima para copiar.")
+    
+    # Botão de compartilhar
+    with col2:
+        compartilhar_url = f"https://wa.me/?text={texto_compartilhar}"
+        st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True)
