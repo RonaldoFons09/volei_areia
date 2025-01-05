@@ -40,7 +40,7 @@ if st.button("Calcular"):
     total_participantes = 0
 
     # String para armazenar a saída formatada
-    resultado = f"**Vôlei hoje ({data_atual}) \n\n**{texto}"
+    resultado = f"**Vôlei hoje ({data_atual})** \n\n{texto}"
 
     # Contagem de horários e valores por participante
     resultado += "Contagem de horários e valores por participante:\n"
@@ -48,7 +48,7 @@ if st.button("Calcular"):
         if quantidade > 0:  # Mostra apenas horários que aparecem na lista
             valor_por_participante = valor_hora / quantidade
             total_participantes += valor_por_participante  # Soma o valor de cada participante
-            resultado += f"- {hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
+            resultado += f"{hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
 
     # Total dos valores por participante
     resultado += f"Todos os horários: R$ {total_participantes:.2f}\n"
