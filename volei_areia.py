@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import urllib.parse
 
 # Título do app
 st.title("Contador de Participantes de Vôlei 🏐")
@@ -58,3 +59,14 @@ if st.button("Calcular"):
 
     # Exibir o resultado formatado dentro de uma caixinha
     st.code(resultado, language="markdown")
+    
+    # Codificar o texto para uso em URL
+    texto_compartilhar = urllib.parse.quote(resultado)
+
+    # Link de compartilhamento no WhatsApp
+    url_whatsapp = f"https://api.whatsapp.com/send?text={texto_compartilhar}"
+    st.markdown(f"[Compartilhar no WhatsApp]({url_whatsapp})", unsafe_allow_html=True)
+
+    # Link de compartilhamento no Telegram (opcional)
+    url_telegram = f"https://t.me/share/url?url=&text={texto_compartilhar}"
+    st.markdown(f"[Compartilhar no Telegram]({url_telegram})", unsafe_allow_html=True)
