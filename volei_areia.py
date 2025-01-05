@@ -7,15 +7,19 @@ st.title("Contador de Participantes de Vôlei 🏐")
 
 # Entrada do texto
 texto = st.text_area("Digite a lista de participantes e horários:", """
-1. Natan 18h
+1. Ronaldo 18h
 2. Ronaldo 18h
-3. Gabriel 17h
-4. Daniel Farias 17h - 18h
-5. Gabi 17h - 18h
-6. Mailson 17h - 18h
-13. Thailan 17h
-14. Débora 17h
-15. Fabio 17h
+3. Ronaldo 18h
+4. Ronaldo 18h
+5. Ronaldo 18h
+6. Ronaldo 18h
+7. Ronaldo 18h
+8. Ronaldo 18h
+9. Ronaldo 18h
+10. Ronaldo 18h
+11. Ronaldo 18h
+12. Ronaldo 18h
+
 """, height=300)
 
 # Entrada do valor da hora
@@ -43,7 +47,7 @@ if st.button("Calcular"):
     total_participantes = 0
 
     # String para armazenar a saída formatada
-    resultado = f"**Vôlei hoje ({data_atual})**\n\n"
+    resultado = f"**Vôlei hoje ({data_atual})** {texto}\n\n"
 
     # Contagem de horários e valores por participante
     resultado += "### Contagem de horários e valores por participante:\n"
