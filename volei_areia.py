@@ -39,14 +39,18 @@ if st.button("Calcular"):
 
     # Contagem de horários e valores por participante
     resultado += "\n\n\nHorários e valores por participante:\n\n"
+    horarios_com_participantes = 0
     for hora, quantidade in contagem_horarios.items():
         if quantidade > 0:  # Mostra apenas horários que aparecem na lista
+            horarios_com_participantes += 1
             valor_por_participante = valor_hora / quantidade
             total_participantes += valor_por_participante  # Soma o valor de cada participante
             resultado += f"{hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
 
-    # Total dos valores por participante
-    resultado += f"Todos os horários: R$ {total_participantes:.2f}\n\n"
+    # Adiciona o total somente se houver mais de um horário com participantes
+    if horarios_com_participantes > 1:
+        resultado += f"Todos os horários: R$ {total_participantes:.2f}\n\n"
+    
     resultado += "\nPix: (adicione a chave)\n"
 
     # Exibir o resultado formatado dentro de uma caixinha
@@ -65,4 +69,4 @@ if st.button("Calcular"):
     # Botão de compartilhar
     with col2:
         compartilhar_url = f"https://wa.me/?text={texto_compartilhar}"
-        st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True) 
+        st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True)
