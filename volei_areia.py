@@ -24,8 +24,7 @@ valor_hora = st.number_input("Digite o valor da hora (R$):", min_value=0.0, step
 if st.button("Calcular"):
     # Obter a data atual
     data_atual = datetime.now().strftime("%d/%m/%Y")
-    st.write(f"**Vôlei hoje ({data_atual})** \n{texto}")
-
+    
     # Converte o texto em uma lista, removendo os números e espaços extras
     lista = [linha.split('. ', 1)[-1].strip() for linha in texto.strip().splitlines()]
 
@@ -42,14 +41,20 @@ if st.button("Calcular"):
     # Variável para somar os valores dos participantes
     total_participantes = 0
 
-    # Exibe a contagem de horários e calcula o valor por participante
-    st.write("### Contagem de horários e valores por participante:")
+    # String para armazenar a saída formatada
+    resultado = f"**Vôlei hoje ({data_atual})**\n\n"
+
+    # Contagem de horários e valores por participante
+    resultado += "### Contagem de horários e valores por participante:\n"
     for hora, quantidade in contagem_horarios.items():
         if quantidade > 0:  # Mostra apenas horários que aparecem na lista
             valor_por_participante = valor_hora / quantidade
             total_participantes += valor_por_participante  # Soma o valor de cada participante
-            st.write(f"- **{hora}**: ({quantidade}P), R$ {valor_por_participante:.2f}")
+            resultado += f"- {hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
 
-    # Exibe o total dos valores por participante
-    st.write(f"\n**Todos os horários: R$ {total_participantes:.2f}**")
-    st.write("\n\nPix: (adicione a chave)")
+    # Total dos valores por participante
+    resultado += f"\n**Todos os horários: R$ {total_participantes:.2f}**\n"
+    resultado += "\nPix: (adicione a chave)\n"
+
+    # Exibir o resultado formatado dentro de uma caixinha
+    st.code(resultado, language="markdown")
