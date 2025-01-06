@@ -66,7 +66,7 @@ def gerar_relatorio(data, texto_original, valores):
         "*Vôlei hoje ({data})*\n\n"
         "{texto_original}\n\n"
         "Horários e valores por participante:\n"
-        "{horarios}\n\n"
+        "{horarios}\n"
         "Todos os horários: R$ {total_horarios:.2f}\n\n"
         "Pix: (adicione a chave)"
     )
