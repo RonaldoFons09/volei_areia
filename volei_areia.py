@@ -62,17 +62,29 @@ def calcular_valores(lista, valor_hora):
 
 def gerar_relatorio(data, texto_original, valores):
     """Gera o relatório formatado."""
+    # Verifica se existem mais de um horário
+    exibir_total = len(valores) > 1
+    total_horarios = sum(valor for _, _, valor in valores) if exibir_total else 0
+
     template = (
         "*Vôlei hoje ({data})*\n\n"
         "{texto_original}\n\n"
         "*Horários e valores por participante:*\n"
         "{horarios}\n"
-        "Todos os horários: R$ {total_horarios:.2f}\n\n"
-        "Pix: (adicione a chave)"
     )
+
+    if exibir_total:
+        template += "Todos os horários: R$ {total_horarios:.2f}\n\n"
+
+    template += "Pix: (adicione a chave)"
+
     horarios = "\n".join(f"{hora}: ({qtd}P), R$ {valor:.2f}" for hora, qtd, valor in valores)
-    total_horarios = sum(valor for _, _, valor in valores)  # Soma de todos os valores
-    return template.format(data=data, texto_original=texto_original, horarios=horarios, total_horarios=total_horarios)
+    return template.format(
+        data=data,
+        texto_original=texto_original,
+        horarios=horarios,
+        total_horarios=total_horarios,
+    )
 
 
 # --- Streamlit App ---
@@ -120,4 +132,3 @@ if st.button("Calcular"):
 
     except Exception as e:
         st.error(f"Ocorreu um erro inesperado: {e}")
-
