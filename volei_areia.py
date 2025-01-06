@@ -1,83 +1,124 @@
-# script atual
 import streamlit as st
 from datetime import datetime
 import urllib.parse
+import re
 
-# Título do app
+
+def validar_horarios(texto):
+    """Valida os horários no texto, retornando válidos e inválidos."""
+    padrao_horario = re.compile(r'\b\d{1,2}(h|:00|hr|hrs)\b')
+    horarios_validos = []
+    horarios_invalidos = []
+    for palavra in texto.split():
+        if padrao_horario.match(palavra):
+            horarios_validos.append(palavra)
+        else:
+            horarios_invalidos.append(palavra)
+    return horarios_validos, horarios_invalidos
+
+
+def processar_lista(texto):
+    """Processa o texto, removendo números e filtrando horários."""
+    lista = []
+    for linha in texto.strip().splitlines():
+        if linha.startswith(tuple(str(i) for i in range(1, 101))) and '. ' in linha:
+            linha = linha.split('. ', 1)[-1].strip()
+        lista.append(linha)
+    return lista
+
+
+def normalizar_horarios(horarios):
+    """Normaliza formatos de horários (ex.: 17hr -> 17h)."""
+    horarios_normalizados = []
+    for horario in horarios:
+        horario = (
+            horario.lower()
+            .replace(':00', 'h')
+            .replace('hr', 'h')
+            .replace('hrs', 'h')
+            .replace(' h', 'h')
+            .replace('h ', 'h')
+        )
+        horarios_normalizados.append(horario)
+    return horarios_normalizados
+
+
+def calcular_valores(lista, valor_hora):
+    """Calcula os valores por participante e total."""
+    contagem_horarios = {f"{hora}h": 0 for hora in range(24)}
+    for item in lista:
+        validos, _ = validar_horarios(item)
+        horarios = normalizar_horarios(validos)
+        for horario in horarios:
+            contagem_horarios[horario] += 1
+
+    resultado = []
+    for hora, quantidade in contagem_horarios.items():
+        if quantidade > 0:
+            valor_por_participante = valor_hora / quantidade
+            resultado.append((hora, quantidade, valor_por_participante))
+    return resultado
+
+
+def gerar_relatorio(data, texto_original, valores):
+    """Gera o relatório formatado."""
+    template = """
+    *Vôlei hoje ({data})*
+
+    {texto_original}
+
+    Horários e valores por participante:
+    {horarios}
+
+    Pix: (adicione a chave)
+    """
+    horarios = "\n".join(f"{hora}: ({qtd}P), R$ {valor:.2f}" for hora, qtd, valor in valores)
+    return template.format(data=data, texto_original=texto_original, horarios=horarios)
+
+
+# --- Streamlit App ---
 st.title("Contador de Participantes de Vôlei 🏐")
 
 # Entrada do texto
-texto = st.text_area("Digite a lista de participantes e horários:", """
-
-""", height=300)
+texto = st.text_area("Digite a lista de participantes e horários:", "", height=300)
 
 # Entrada do valor da hora
 valor_hora = st.number_input("Digite o valor da hora (R$):", min_value=0.0, step=1.0, value=45.0)
 
-# Botão para processar o texto
 if st.button("Calcular"):
     if not texto.strip():
         st.warning("Por favor, insira a lista de participantes e horários antes de calcular.")
         st.stop()
 
-    # Obter a data atual
-    data_atual = datetime.now().strftime("%d/%m/%Y")
+    try:
+        # Obter a data atual
+        data_atual = datetime.now().strftime("%d/%m/%Y")
 
-    # Converte o texto em uma lista, removendo os números e espaços extras
-    lista = [linha.split('. ', 1)[-1].strip() for linha in texto.strip().splitlines()]
+        # Processar a lista
+        lista = processar_lista(texto)
 
-    # Detectar linhas inválidas (sem horários)
-    linhas_invalidas = [linha for linha in lista if not any(substring in linha for substring in ['h', 'hr', 'hrs', ':00'])]
-    if linhas_invalidas:
-        st.warning(f"Linhas inválidas detectadas e ignoradas: {', '.join(linhas_invalidas)}")
+        # Verificar linhas inválidas
+        linhas_invalidas = [linha for linha in lista if not validar_horarios(linha)[0]]
+        if linhas_invalidas:
+            st.warning(f"Linhas inválidas detectadas e ignoradas: {', '.join(linhas_invalidas)}")
 
+        # Calcular os valores
+        valores_calculados = calcular_valores(lista, valor_hora)
+        valor_total = sum(valor for _, _, valor in valores_calculados)
 
-    # Dicionário para contabilizar os horários
-    contagem_horarios = {f"{hora}h": 0 for hora in range(24)}
+        # Gerar e exibir o relatório
+        relatorio = gerar_relatorio(data_atual, texto, valores_calculados)
+        st.code(relatorio, language="markdown")
 
-    # Processa cada entrada
-    for item in lista:
-        # Captura os horários no formato "17h", "18h", etc.
-        horarios = [h.strip() for h in item.split() if h.endswith('h')]
-        for horario in horarios:
-            contagem_horarios[horario] += 1
-
-    # Variável para somar os valores dos participantes
-    total_participantes = 0
-
-    # String para armazenar a saída formatada
-    resultado = f"*Vôlei hoje ({data_atual})* \n\n{texto}"
-
-    # Contagem de horários e valores por participante
-    resultado += "\n\n\nHorários e valores por participante:\n\n"
-    horarios_com_participantes = 0
-    for hora, quantidade in contagem_horarios.items():
-        if quantidade > 0:  # Mostra apenas horários que aparecem na lista
-            horarios_com_participantes += 1
-            valor_por_participante = valor_hora / quantidade
-            total_participantes += valor_por_participante  # Soma o valor de cada participante
-            resultado += f"{hora}: ({quantidade}P), R$ {valor_por_participante:.2f}\n"
-
-    # Adiciona o total somente se houver mais de um horário com participantes
-    if horarios_com_participantes > 1:
-        resultado += f"Todos os horários: R$ {total_participantes:.2f}\n\n"
-
-    resultado += "\nPix: (adicione a chave)\n"
-
-    # Exibir o resultado formatado dentro de uma caixinha
-    st.code(resultado, language="markdown")
-
-    # Codificar o texto para ser compartilhado via URL
-    texto_compartilhar = urllib.parse.quote(resultado)
-
-    # Adicionar botões de copiar e compartilhar
-    col1, col2 = st.columns(2)
-
-    # Botão de copiar (já nativo no st.code)
-    with col1:
-        st.caption("Clique no botão acima para copiar.")
-
-    # Botão de compartilhar
-    with col2:
+        # Codificar o texto para compartilhamento
+        texto_compartilhar = urllib.parse.quote(relatorio)
         compartilhar_url = f"https://wa.me/?text={texto_compartilhar}"
-        st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success("Cálculo realizado com sucesso! Relatório gerado abaixo.")
+        with col2:
+            st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"Ocorreu um erro inesperado: {e}")
