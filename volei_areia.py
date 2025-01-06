@@ -16,6 +16,10 @@ valor_hora = st.number_input("Digite o valor da hora (R$):", min_value=0.0, step
 
 # Botão para processar o texto
 if st.button("Calcular"):
+    if not texto.strip():
+        st.warning("Por favor, insira a lista de participantes e horários antes de calcular.")
+        st.stop()
+        
     # Obter a data atual
     data_atual = datetime.now().strftime("%d/%m/%Y")
 
