@@ -114,7 +114,7 @@ if st.button("Calcular"):
 
         col1, col2 = st.columns(2)
         with col1:
-            st.success("Cálculo realizado com sucesso! Relatório gerado abaixo.")
+            st.success("Cálculo realizado com sucesso! Relatório gerado.")
         with col2:
             st.markdown(f"[📤 Compartilhar no WhatsApp]({compartilhar_url})", unsafe_allow_html=True)
 
