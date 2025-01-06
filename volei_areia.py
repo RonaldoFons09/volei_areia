@@ -108,7 +108,7 @@ if st.button("Calcular"):
 
         # Gerar e exibir o relatório
         relatorio = gerar_relatorio(data_atual, texto, valores_calculados)
-        st.markdown(relatorio)
+        st.text(relatorio)
 
         # Codificar o texto para compartilhamento
         texto_compartilhar = urllib.parse.quote(relatorio)
