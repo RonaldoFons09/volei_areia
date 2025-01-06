@@ -120,3 +120,4 @@ if st.button("Calcular"):
 
     except Exception as e:
         st.error(f"Ocorreu um erro inesperado: {e}")
+
