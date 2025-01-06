@@ -67,11 +67,12 @@ def gerar_relatorio(data, texto_original, valores):
         "{texto_original}\n\n"
         "Horários e valores por participante:\n"
         "{horarios}\n\n"
+        "Todos os horários: R$ {total_horarios:.2f}\n\n"
         "Pix: (adicione a chave)"
     )
     horarios = "\n".join(f"{hora}: ({qtd}P), R$ {valor:.2f}" for hora, qtd, valor in valores)
-    return template.format(data=data, texto_original=texto_original, horarios=horarios)
-
+    total_horarios = sum(valor for _, _, valor in valores)  # Soma de todos os valores
+    return template.format(data=data, texto_original=texto_original, horarios=horarios, total_horarios=total_horarios)
 
 
 # --- Streamlit App ---
@@ -102,7 +103,6 @@ if st.button("Calcular"):
 
         # Calcular os valores
         valores_calculados = calcular_valores(lista, valor_hora)
-        valor_total = sum(valor for _, _, valor in valores_calculados)
 
         # Gerar e exibir o relatório
         relatorio = gerar_relatorio(data_atual, texto, valores_calculados)
