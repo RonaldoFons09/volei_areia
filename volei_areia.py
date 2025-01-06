@@ -62,18 +62,16 @@ def calcular_valores(lista, valor_hora):
 
 def gerar_relatorio(data, texto_original, valores):
     """Gera o relatório formatado."""
-    template = """
-    *Vôlei hoje ({data})*
-
-    {texto_original}
-
-    Horários e valores por participante:
-    {horarios}
-
-    Pix: (adicione a chave)
-    """
+    template = (
+        "*Vôlei hoje ({data})*\n\n"
+        "{texto_original}\n\n"
+        "Horários e valores por participante:\n"
+        "{horarios}\n\n"
+        "Pix: (adicione a chave)"
+    )
     horarios = "\n".join(f"{hora}: ({qtd}P), R$ {valor:.2f}" for hora, qtd, valor in valores)
     return template.format(data=data, texto_original=texto_original, horarios=horarios)
+
 
 
 # --- Streamlit App ---
