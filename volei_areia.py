@@ -26,6 +26,12 @@ if st.button("Calcular"):
     # Converte o texto em uma lista, removendo os números e espaços extras
     lista = [linha.split('. ', 1)[-1].strip() for linha in texto.strip().splitlines()]
 
+    # Detectar linhas inválidas (sem horários)
+    linhas_invalidas = [linha for linha in lista if not any(substring in linha for substring in ['h', 'hr', 'hrs', ':00'])]
+    if linhas_invalidas:
+        st.warning(f"Linhas inválidas detectadas e ignoradas: {', '.join(linhas_invalidas)}")
+
+
     # Dicionário para contabilizar os horários
     contagem_horarios = {f"{hora}h": 0 for hora in range(24)}
 
