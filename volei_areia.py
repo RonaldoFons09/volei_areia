@@ -76,7 +76,7 @@ def gerar_relatorio(data, texto_original, valores):
     if exibir_total:
         template += "Todos os horários: R$ {total_horarios:.2f}\n\n"
 
-    template += "Pix: (adicione a chave)"
+    template += "Pix: ventusbc@gmail.com"
 
     horarios = "\n".join(f"{hora}: ({qtd}P), R$ {valor:.2f}" for hora, qtd, valor in valores)
     return template.format(
