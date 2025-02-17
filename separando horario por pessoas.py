@@ -1,8 +1,79 @@
-import re
 import streamlit as st
+import re
 
+def main():
+    st.title("Organizador de Horários de Vôlei �")
+    
+    # Entrada de dados
+    st.header("Entrada de Dados")
+    texto = st.text_area("Cole aqui a lista de participantes:", height=300,
+                        help="Formato: Nome Hora1 Hora2...\nEx: João 17h 19h\nMaria 18h")
+    
+    if st.button("Processar Dados"):
+        if not texto.strip():
+            st.error("Por favor, insira os dados dos participantes!")
+            return
+        
+        try:
+            # Processamento dos dados
+            pessoas = processar_dados(texto)
+            
+            # Organização por horários
+            horarios_organizados = organizar_horarios(pessoas)
+            
+            # Exibição dos resultados
+            st.success("Dados processados com sucesso!")
+            exibir_resultados(horarios_organizados)
+            
+        except Exception as e:
+            st.error(f"Erro no processamento: {str(e)}")
+
+def processar_dados(texto):
+    """Processa o texto de entrada e retorna lista de participantes"""
+    pessoas = []
+    for linha in processar_lista(texto):
+        horas_validas, partes_invalidas = validar_horarios(linha)
+        if not horas_validas:
+            st.warning(f"Linha ignorada (sem horários válidos): {linha}")
+            continue
+        
+        nome = ' '.join(partes_invalidas).strip()
+        horas = normalizar_horarios(horas_validas)
+        
+        if nome and horas:
+            pessoas.append((nome, horas))
+    return pessoas
+
+def organizar_horarios(pessoas):
+    """Organiza os participantes por horário"""
+    horarios = sorted(
+        {hora for _, horas in pessoas for hora in horas},
+        key=lambda x: int(x[:-1])
+    )
+    
+    grupos = {hora: [] for hora in horarios}
+    for nome, horas in pessoas:
+        for hora in horas:
+            grupos[hora].append(nome)
+    
+    return grupos
+
+def exibir_resultados(horarios):
+    """Exibe os resultados formatados no Streamlit"""
+    st.header("Resultado da Organização")
+    
+    for hora, participantes in horarios.items():
+        with st.expander(f"{hora} - {len(participantes)} participantes"):
+            st.write("\n".join([f"{i+1}. {nome}" for i, nome in enumerate(participantes)]))
+            st.download_button(
+                label="Baixar Lista",
+                data="\n".join(participantes),
+                file_name=f"lista_{hora}.txt",
+                key=hora
+            )
+
+# Funções auxiliares (mantidas do código original)
 def validar_horarios(texto):
-    """Identifica e retorna horários válidos e inválidos em um texto"""
     padrao = re.compile(r'\b\d{1,2}(h|:00|hr|hrs)\b')
     validos = []
     invalidos = []
@@ -14,7 +85,6 @@ def validar_horarios(texto):
     return validos, invalidos
 
 def processar_lista(texto):
-    """Processa o texto removendo números iniciais e espaços extras"""
     linhas = []
     for linha in texto.strip().split('\n'):
         linha = linha.strip()
@@ -24,7 +94,6 @@ def processar_lista(texto):
     return linhas
 
 def normalizar_horarios(horarios):
-    """Padroniza os formatos de horário para XXh"""
     normalizados = []
     for hora in horarios:
         hora_norm = hora.lower().replace(':00', 'h').replace('hrs', 'h').replace('hr', 'h').strip()
@@ -34,61 +103,5 @@ def normalizar_horarios(horarios):
                 normalizados.append(f"{int(num)}h")
     return normalizados
 
-st.title("Processamento de Horários")
-
-default_input = """
-Ianca 17h 18h 
-Davi 17h
-Gabriel 17h 18h
-gabbs 17h 18h
-Marcelo 17h 18h
-Ana 18h
-Paulo 17h 18h
-Mailson 17h 18h
-Daniel Farias 17h 18h
-Mateus 17h 18h
-Natan 18h
-Janaice 18h
-Jordanna 18h
-Junior 17h
-Vinícius 17h
-Pinço 17h
-"""
-
-input_text = st.text_area("Digite os dados (nome e horários):", default_input, height=300)
-
-if st.button("Processar"):
-    pessoas = []
-    for linha in processar_lista(input_text):
-        horas_validas, partes_invalidas = validar_horarios(linha)
-        if not horas_validas:
-            continue
-
-        nome = ' '.join(partes_invalidas).strip()
-        horas = normalizar_horarios(horas_validas)
-
-        if nome and horas:
-            pessoas.append((nome, horas))
-
-    if pessoas:
-        # Organizar os horários disponíveis
-        horarios_disponiveis = sorted(
-            {hora for _, horas in pessoas for hora in horas},
-            key=lambda x: int(x[:-1])
-        )
-
-        grupo_por_horario = {hora: [] for hora in horarios_disponiveis}
-
-        for nome, horas in pessoas:
-            for hora in horas:
-                grupo_por_horario[hora].append(nome)
-
-        # Exibir os resultados
-        for hora in horarios_disponiveis:
-            participantes = grupo_por_horario[hora]
-            st.subheader(f"{hora} - {len(participantes)} Pessoas")
-            for i, nome in enumerate(participantes, 1):
-                st.write(f"{i}. {nome}")
-            st.markdown("---")
-    else:
-        st.warning("Nenhum dado processado.")
+if __name__ == "__main__":
+    main()
