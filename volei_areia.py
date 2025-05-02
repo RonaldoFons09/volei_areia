@@ -5,12 +5,13 @@ import re
 
 
 def validar_horarios(texto):
-    """Valida os horários no texto, retornando válidos e inválidos."""
-    padrao_horario = re.compile(r'\b\d{1,2}(h|:00|hr|hrs)\b')
+    """Valida os horários no texto (ex.: 17h, 17hr, 17hrs, 17hs), retornando válidos e inválidos."""
+    # aceita número de 1 ou 2 dígitos seguido de h, hs, hr ou hrs
+    padrao_horario = re.compile(r'\b\d{1,2}(?:h|hs|hr|hrs)\b', re.IGNORECASE)
     horarios_validos = []
     horarios_invalidos = []
     for palavra in texto.split():
-        if padrao_horario.match(palavra):
+        if padrao_horario.fullmatch(palavra):
             horarios_validos.append(palavra)
         else:
             horarios_invalidos.append(palavra)
@@ -18,28 +19,49 @@ def validar_horarios(texto):
 
 
 def processar_lista(texto):
-    """Processa o texto, removendo números e filtrando horários."""
-    lista = []
-    for linha in texto.strip().splitlines():
-        if linha.startswith(tuple(str(i) for i in range(1, 101))) and '. ' in linha:
-            linha = linha.split('. ', 1)[-1].strip()
-        lista.append(linha)
-    return lista
+    """
+    Processa o texto de entrada e:
+      1. Remove numeração “1. ” a “100. ” do início de cada linha.
+      2. Valida se cada linha contém ao menos um horário válido (17h, 17hr, 17hrs ou 17hs).
+      3. Se houver qualquer linha sem horário válido, lança ValueError listando essas linhas.
+      4. Caso contrário, retorna a lista de linhas já “limpas”.
+    """
+
+    def _remover_prefixo(linha: str) -> str:
+        # remove "1. ", "2. ", ... até "100. " do início
+        return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
+
+    linhas = [_remover_prefixo(l) for l in texto.strip().splitlines() if l.strip()]
+
+    # verifica cada linha: deve conter ao menos um horário válido
+    linhas_invalidas = []
+    for l in linhas:
+        validos, _ = validar_horarios(l)
+        if not validos:
+            linhas_invalidas.append(l)
+
+    if linhas_invalidas:
+        # lança exceção para interromper o fluxo e forçar correção
+        raise ValueError(
+            "Linhas inválidas detectadas (sem horário válido). Por favor, corrija essas linhas e tente novamente.\n  - " +
+            "\n  - ".join(linhas_invalidas)
+        )
+
+    return linhas
 
 
 def normalizar_horarios(horarios):
-    """Normaliza formatos de horários (ex.: 17hr -> 17h)."""
+    """Normaliza formatos de horários (converte hr/hrs/hs para h)."""
     horarios_normalizados = []
-    for horario in horarios:
-        horario = (
-            horario.lower()
-            .replace(':00', 'h')
-            .replace('hr', 'h')
-            .replace('hrs', 'h')
-            .replace(' h', 'h')
-            .replace('h ', 'h')
-        )
-        horarios_normalizados.append(horario)
+    for h in horarios:
+        h = h.lower().strip()
+        # converte todas as variações para "h"
+        # primeiro, tratar plural "hrs" e "hs", depois singular "hr"
+        h = re.sub(r'hrs$|hs$', 'h', h)
+        h = re.sub(r'hr$', 'h', h)
+        # caso ainda reste algum espaço antes/depois
+        h = h.replace(' h', 'h').replace('h ', 'h')
+        horarios_normalizados.append(h)
     return horarios_normalizados
 
 
@@ -67,9 +89,9 @@ def gerar_relatorio(data, texto_original, valores):
     total_horarios = sum(valor for _, _, valor in valores) if exibir_total else 0
 
     template = (
-        "*Vôlei hoje ({data})*\n\n"
+        "*Vôlei {data}*\n\n"
         "{texto_original}\n\n"
-        "*Horários e valores por participante:*\n"
+        "*Valores por participante:*\n"
         "{horarios}\n"
     )
 
