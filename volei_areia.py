@@ -20,24 +20,33 @@ def validar_horarios(texto):
 
 def processar_lista(texto):
     """
-    Processa o texto de entrada e:
+    Processa o texto de entrada:
+
       1. Remove numeração “1. ” a “100. ” do início de cada linha.
-      2. Valida se cada linha contém ao menos um horário válido (17h, 17hr, 17hrs ou 17hs).
-      3. Se houver qualquer linha sem horário válido, lança ValueError listando essas linhas.
-      4. Caso contrário, retorna a lista de linhas já “limpas”.
+      2. Garante que **todos** os horários mencionados em cada linha estejam num dos formatos:
+         17h, 17hr, 17hrs ou 17hs (sem espaço entre número e sufixo).
+      3. Se qualquer horário estiver fora desse padrão, lança ValueError listando
+         as linhas inválidas.
+      4. Caso contrário, retorna a lista de linhas já “limpas” (sem prefixos numéricos).
     """
 
     def _remover_prefixo(linha: str) -> str:
-        # remove "1. ", "2. ", ... até "100. " do início
+        # tira "1. ", "2. " ... até "100. "
         return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
 
-    linhas = [_remover_prefixo(l) for l in texto.strip().splitlines() if l.strip()]
+    # 1) limpa prefixos e descarta linhas em branco
+    linhas = [
+        _remover_prefixo(linha)
+        for linha in texto.strip().splitlines()
+        if linha.strip()
+    ]
 
-    # verifica cada linha: deve conter ao menos um horário válido
     linhas_invalidas = []
     for l in linhas:
-        validos, _ = validar_horarios(l)
-        if not validos:
+        validos, invalidos = validar_horarios(l)
+        # Se aparecer ANY token inválido que contenha dígito ou 'h', erro.
+        # Isso cobre casos como "18 h" (separado em "18" e "h") ou "18hsx".
+        if any(re.search(r'\d|h', tok, re.IGNORECASE) for tok in invalidos):
             linhas_invalidas.append(l)
 
     if linhas_invalidas:
