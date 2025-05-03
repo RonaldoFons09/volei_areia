@@ -20,53 +20,45 @@ def validar_horarios(texto):
 
 def processar_lista(texto):
     """
-    Processa um bloco de texto com linhas numeradas de participantes e horários, removendo prefixos
-    numéricos e certificando-se de que TODOS os números estejam no formato de horário válido.
+    Processa um bloco de texto contendo linhas numeradas de participantes com horários de jogo,
+    removendo prefixos numéricos e validando formatos de horário.
 
-    Passos:
-      1. Remove numeração “1. ” a “100. ” do início de cada linha.
-      2. Para cada linha, verifica se existe algum número de 1 ou 2 dígitos que NÃO seja seguido
-         imediatamente por um dos sufixos válidos (h, hs, hr, hrs).
-      3. Se encontrar tal número “solto” (indicando horário mal formatado), considera a linha inválida.
-      4. Se houver linhas inválidas, lança ValueError listando-as.
-      5. Caso contrário, retorna a lista de linhas sem prefixos numéricos.
-
-    Parâmetros:
-        texto (str): Bloco de texto com linhas numeradas (ex.: “1. Thailan 17h e 18h”).
-
-    Retorna:
-        List[str]: Linhas já “limpas”, sem o “1. ”, “2. ” etc.
-
-    Lança:
-        ValueError: Se alguma linha contiver número não formatado como horário válido.
+    Para cada linha:
+      1. Remove numeração “1. ” a “100. ” do início.
+      2. Localiza apenas os “potenciais horários” (tokens que começam com dígito).
+      3. Verifica se cada um desses potenciais horários bate no padrão (17h, 17hr, 17hrs, 17hs).
+      4. Se algum potencial não for válido, marca a linha como inválida.
+      5. Se houver linhas inválidas, lança ValueError listando-as.
+      6. Caso contrário, retorna as linhas “limpas” (sem prefixos).
     """
     def _remover_prefixo(linha: str) -> str:
         return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
 
-    # Remove prefixos e descarta linhas em branco
+    padrao = re.compile(r'\b\d{1,2}(?:h|hs|hr|hrs)\b', re.IGNORECASE)
+
     linhas = [
         _remover_prefixo(linha)
         for linha in texto.strip().splitlines()
         if linha.strip()
     ]
 
-    # padrão para detectar número não seguido de h|hs|hr|hrs
-    padrao_numero_sem_sufixo = re.compile(r'\b\d{1,2}(?!(?:h|hs|hr|hrs)\b)', re.IGNORECASE)
+    invalidas = []
+    for l in linhas:
+        # extrai só os tokens que começam com dígito (potenciais horários)
+        potenciais = re.findall(r'\b\d+\w*\b', l)
+        # daqueles, veja quais NÃO batem no padrão
+        incorretos = [tok for tok in potenciais if not padrao.fullmatch(tok)]
+        if incorretos:
+            invalidas.append((l, incorretos))
 
-    linhas_invalidas = []
-    for linha in linhas:
-        # se existir número “solto” (mal formatado) na linha
-        if padrao_numero_sem_sufixo.search(linha):
-            linhas_invalidas.append(linha)
-
-    if linhas_invalidas:
-        raise ValueError(
-            "Linhas inválidas detectadas (número não formatado como horário). "
-            "Por favor, corrija e tente novamente:\n  - " +
-            "\n  - ".join(linhas_invalidas)
-        )
+    if invalidas:
+        msg = "Linhas inválidas (horário fora do padrão):\n"
+        for linha, toks in invalidas:
+            msg += f"  - {linha!r}, tokens inválidos: {', '.join(toks)}\n"
+        raise ValueError(msg)
 
     return linhas
+
 
 
 def normalizar_horarios(horarios):
