@@ -20,21 +20,30 @@ def validar_horarios(texto):
 
 def processar_lista(texto):
     """
-    Processa o texto de entrada:
+    Processa um bloco de texto contendo linhas numeradas de participantes com horários de jogo,
+    removendo prefixos numéricos e validando formatos de horário.
 
-      1. Remove numeração “1. ” a “100. ” do início de cada linha.
-      2. Garante que **todos** os horários mencionados em cada linha estejam num dos formatos:
-         17h, 17hr, 17hrs ou 17hs (sem espaço entre número e sufixo).
-      3. Se qualquer horário estiver fora desse padrão, lança ValueError listando
-         as linhas inválidas.
-      4. Caso contrário, retorna a lista de linhas já “limpas” (sem prefixos numéricos).
+    Para cada linha do texto:
+      1. Remove numeração “1. ” a “100. ” do início.
+      2. Verifica todos os tokens que não bateram no padrão de horário (17h, 17hr, 17hrs, 17hs).
+      3. Se existir qualquer token inválido que contenha dígito, considera a linha inválida.
+      4. Se houver linhas inválidas, lança ValueError listando-as.
+      5. Caso contrário, retorna a lista de linhas limpas (sem prefixos).
+
+    Parâmetros:
+        texto (str): Bloco de texto com linhas numeradas, cada linha contendo nome e horários.
+
+    Retorna:
+        List[str]: Linhas já “limpas”, sem numeração prefixada.
+
+    Lança:
+        ValueError: Se alguma linha contiver tokens com dígitos que não correspondam a um horário válido.
     """
 
     def _remover_prefixo(linha: str) -> str:
-        # tira "1. ", "2. " ... até "100. "
         return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
 
-    # 1) limpa prefixos e descarta linhas em branco
+    # Remove prefixos numéricos e descarta linhas em branco
     linhas = [
         _remover_prefixo(linha)
         for linha in texto.strip().splitlines()
@@ -44,13 +53,11 @@ def processar_lista(texto):
     linhas_invalidas = []
     for l in linhas:
         validos, invalidos = validar_horarios(l)
-        # Se aparecer ANY token inválido que contenha dígito ou 'h', erro.
-        # Isso cobre casos como "18 h" (separado em "18" e "h") ou "18hsx".
-        if any(re.search(r'\d|h', tok, re.IGNORECASE) for tok in invalidos):
+        # só tokens contendo dígito (e que não foram reconhecidos como horário) são inválidos
+        if any(re.search(r'\d', tok) for tok in invalidos):
             linhas_invalidas.append(l)
 
     if linhas_invalidas:
-        # lança exceção para interromper o fluxo e forçar correção
         raise ValueError(
             "Linhas inválidas detectadas (sem horário válido). Por favor, corrija essas linhas e tente novamente.\n  - " +
             "\n  - ".join(linhas_invalidas)
