@@ -23,42 +23,47 @@ def processar_lista(texto):
     Processa um bloco de texto contendo linhas numeradas de participantes com horários de jogo,
     removendo prefixos numéricos e validando formatos de horário.
 
-    Para cada linha:
+    Para cada linha do texto:
       1. Remove numeração “1. ” a “100. ” do início.
-      2. Localiza apenas os “potenciais horários” (tokens que começam com dígito).
-      3. Verifica se cada um desses potenciais horários bate no padrão (17h, 17hr, 17hrs, 17hs).
-      4. Se algum potencial não for válido, marca a linha como inválida.
-      5. Se houver linhas inválidas, lança ValueError listando-as.
-      6. Caso contrário, retorna as linhas “limpas” (sem prefixos).
+      2. Verifica todos os tokens que não bateram no padrão de horário (17h, 17hr, 17hrs, 17hs).
+      3. Se existir qualquer token inválido que contenha dígito, considera a linha inválida.
+      4. Se houver linhas inválidas, lança ValueError listando-as.
+      5. Caso contrário, retorna a lista de linhas limpas (sem prefixos).
+
+    Parâmetros:
+        texto (str): Bloco de texto com linhas numeradas, cada linha contendo nome e horários.
+
+    Retorna:
+        List[str]: Linhas já “limpas”, sem numeração prefixada.
+
+    Lança:
+        ValueError: Se alguma linha contiver tokens com dígitos que não correspondam a um horário válido.
     """
+
     def _remover_prefixo(linha: str) -> str:
         return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
 
-    padrao = re.compile(r'\b\d{1,2}(?:h|hs|hr|hrs)\b', re.IGNORECASE)
-
+    # Remove prefixos numéricos e descarta linhas em branco
     linhas = [
         _remover_prefixo(linha)
         for linha in texto.strip().splitlines()
         if linha.strip()
     ]
 
-    invalidas = []
+    linhas_invalidas = []
     for l in linhas:
-        # extrai só os tokens que começam com dígito (potenciais horários)
-        potenciais = re.findall(r'\b\d+\w*\b', l)
-        # daqueles, veja quais NÃO batem no padrão
-        incorretos = [tok for tok in potenciais if not padrao.fullmatch(tok)]
-        if incorretos:
-            invalidas.append((l, incorretos))
+        validos, invalidos = validar_horarios(l)
+        # só tokens contendo dígito (e que não foram reconhecidos como horário) são inválidos
+        if any(re.search(r'\d', tok) for tok in invalidos):
+            linhas_invalidas.append(l)
 
-    if invalidas:
-        msg = "Linhas inválidas (horário fora do padrão):\n"
-        for linha, toks in invalidas:
-            msg += f"  - {linha!r}, tokens inválidos: {', '.join(toks)}\n"
-        raise ValueError(msg)
+    if linhas_invalidas:
+        raise ValueError(
+            "Linhas inválidas detectadas (sem horário válido). Por favor, corrija essas linhas e tente novamente.\n  - " +
+            "\n  - ".join(linhas_invalidas)
+        )
 
     return linhas
-
 
 
 def normalizar_horarios(horarios):
