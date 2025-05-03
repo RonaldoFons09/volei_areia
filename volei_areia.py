@@ -6,37 +6,24 @@ import re
 
 def validar_horarios(texto):
     """Valida os horários no texto (ex.: 17h, 17hr, 17hrs, 17hs), retornando válidos e inválidos."""
-    # aceita número de 1 ou 2 dígitos seguido de h, hs, hr ou hrs
-    padrao_horario = re.compile(r'\b\d{1,2}(?:h|hs|hr|hrs)\b', re.IGNORECASE)
+    padrao_horario = re.compile(r'^(?:[01]?\d|2[0-3])(?:h|hs|hr|hrs)$', re.IGNORECASE)
     horarios_validos = []
     horarios_invalidos = []
     for palavra in texto.split():
-        if padrao_horario.fullmatch(palavra):
-            horarios_validos.append(palavra)
-        else:
-            horarios_invalidos.append(palavra)
+        # só checa palavras que tenham dígito
+        if re.search(r'\d', palavra):
+            if padrao_horario.fullmatch(palavra):
+                horarios_validos.append(palavra)
+            else:
+                horarios_invalidos.append(palavra)
     return horarios_validos, horarios_invalidos
 
 
-import re
-
 
 def processar_lista(texto):
-    """
-    Processa o texto de entrada:
-
-    1. Remove numeração “1. ” a “100. ” do início de cada linha.
-    2. Garante que **todos** os horários mencionados em cada linha estejam num dos formatos:
-       17h, 17hr, 17hrs ou 17hs (sem espaço entre número e sufixo).
-    3. Se qualquer horário inválido aparecer (i.e. qualquer token com dígito que não case),
-       lança ValueError listando as linhas inválidas.
-    4. Caso contrário, retorna a lista de linhas já “limpas” (sem prefixos numéricos).
-    """
-
     def _remover_prefixo(linha: str) -> str:
         return re.sub(r'^\s*(?:[1-9][0-9]?|100)\.\s+', '', linha).strip()
 
-    # 1) limpa prefixos e descarta linhas em branco
     linhas = [
         _remover_prefixo(linha)
         for linha in texto.strip().splitlines()
@@ -46,13 +33,12 @@ def processar_lista(texto):
     linhas_invalidas = []
     for l in linhas:
         validos, invalidos = validar_horarios(l)
-        # Agora só considera inválido se o token inválido contiver dígito
-        if any(re.search(r'\d', tok) for tok in invalidos):
-            linhas_invalidas.append(l)
+        if invalidos:
+            linhas_invalidas.append(f"{l}   ← tokens inválidos: {invalidos!r}")
 
     if linhas_invalidas:
         raise ValueError(
-            "Linhas inválidas detectadas (sem horário válido). Por favor, corrija essas linhas e tente novamente.\n  - "
+            "Linhas inválidas detectadas (horário fora do padrão). Corrija e tente novamente:\n  - "
             + "\n  - ".join(linhas_invalidas)
         )
 
